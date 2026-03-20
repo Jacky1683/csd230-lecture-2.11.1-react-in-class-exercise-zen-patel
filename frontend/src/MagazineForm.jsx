@@ -4,6 +4,7 @@ function MagazineForm({ onMagazineAdded }) {
   const [formData, setFormData] = useState({
     title: '',
     price: '',
+    copies: '',
     orderQty: '',
     currentIssue: ''
   })
@@ -21,7 +22,13 @@ function MagazineForm({ onMagazineAdded }) {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    if (!formData.title || !formData.price || !formData.orderQty || !formData.currentIssue) {
+    if (
+      !formData.title ||
+      !formData.price ||
+      !formData.copies ||
+      !formData.orderQty ||
+      !formData.currentIssue
+    ) {
       setError('Please fill in all fields.')
       return
     }
@@ -29,8 +36,9 @@ function MagazineForm({ onMagazineAdded }) {
     const newMagazine = {
       title: formData.title,
       price: parseFloat(formData.price),
+      copies: parseInt(formData.copies),
       orderQty: parseInt(formData.orderQty),
-      currentIssue: formData.currentIssue
+      currentIssue: `${formData.currentIssue}T00:00:00`
     }
 
     fetch('/api/magazines', {
@@ -40,9 +48,10 @@ function MagazineForm({ onMagazineAdded }) {
       },
       body: JSON.stringify(newMagazine)
     })
-      .then((res) => {
+      .then(async (res) => {
         if (!res.ok) {
-          throw new Error('Failed to add magazine')
+          const text = await res.text()
+          throw new Error(text || 'Failed to add magazine')
         }
         return res.json()
       })
@@ -51,6 +60,7 @@ function MagazineForm({ onMagazineAdded }) {
         setFormData({
           title: '',
           price: '',
+          copies: '',
           orderQty: '',
           currentIssue: ''
         })
@@ -85,6 +95,16 @@ function MagazineForm({ onMagazineAdded }) {
             step="0.01"
             name="price"
             value={formData.price}
+            onChange={handleChange}
+          />
+        </p>
+
+        <p>
+          <label>Copies:</label><br />
+          <input
+            type="number"
+            name="copies"
+            value={formData.copies}
             onChange={handleChange}
           />
         </p>

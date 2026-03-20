@@ -1,9 +1,10 @@
 import { useState } from 'react'
 
-function Magazine({ id, title, price, orderQty, currentIssue, onDelete, onUpdate }) {
+function Magazine({ id, title, price, copies, orderQty, currentIssue, onDelete, onUpdate }) {
   const [isEditing, setIsEditing] = useState(false)
   const [editedTitle, setEditedTitle] = useState(title)
   const [editedPrice, setEditedPrice] = useState(price)
+  const [editedCopies, setEditedCopies] = useState(copies)
   const [editedOrderQty, setEditedOrderQty] = useState(orderQty)
   const [editedCurrentIssue, setEditedCurrentIssue] = useState(
     currentIssue ? currentIssue.substring(0, 10) : ''
@@ -13,8 +14,9 @@ function Magazine({ id, title, price, orderQty, currentIssue, onDelete, onUpdate
     const updatedMagazine = {
       title: editedTitle,
       price: parseFloat(editedPrice),
+      copies: parseInt(editedCopies),
       orderQty: parseInt(editedOrderQty),
-      currentIssue: editedCurrentIssue
+      currentIssue: `${editedCurrentIssue}T00:00:00`
     }
 
     onUpdate(id, updatedMagazine)
@@ -27,14 +29,16 @@ function Magazine({ id, title, price, orderQty, currentIssue, onDelete, onUpdate
   }
 
   return (
-    <div style={{
-      border: '1px solid #ccc',
-      borderRadius: '8px',
-      padding: '15px',
-      marginBottom: '15px',
-      backgroundColor: '#f9f9f9',
-      color: '#000'
-    }}>
+    <div
+      style={{
+        border: '1px solid #ccc',
+        borderRadius: '8px',
+        padding: '15px',
+        marginBottom: '15px',
+        backgroundColor: '#f9f9f9',
+        color: '#000'
+      }}
+    >
       {isEditing ? (
         <>
           <h3>Edit Magazine</h3>
@@ -55,6 +59,15 @@ function Magazine({ id, title, price, orderQty, currentIssue, onDelete, onUpdate
               step="0.01"
               value={editedPrice}
               onChange={(e) => setEditedPrice(e.target.value)}
+            />
+          </p>
+
+          <p>
+            <strong>Copies:</strong><br />
+            <input
+              type="number"
+              value={editedCopies}
+              onChange={(e) => setEditedCopies(e.target.value)}
             />
           </p>
 
@@ -85,6 +98,7 @@ function Magazine({ id, title, price, orderQty, currentIssue, onDelete, onUpdate
         <>
           <h3>{title}</h3>
           <p><strong>Price:</strong> ${Number(price).toFixed(2)}</p>
+          <p><strong>Copies:</strong> {copies}</p>
           <p><strong>Order Quantity:</strong> {orderQty}</p>
           <p><strong>Current Issue:</strong> {formatDate(currentIssue)}</p>
 
