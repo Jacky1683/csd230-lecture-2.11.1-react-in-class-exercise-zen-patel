@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import api from './api/axiosConfig'
 
 function BookForm({ onBookAdded }) {
   const [formData, setFormData] = useState({
@@ -33,21 +34,9 @@ function BookForm({ onBookAdded }) {
       price: parseFloat(formData.price)
     }
 
-    fetch('/api/books', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(newBook)
-    })
+    api.post('/api/books', newBook)
       .then((res) => {
-        if (!res.ok) {
-          throw new Error('Failed to add book')
-        }
-        return res.json()
-      })
-      .then((savedBook) => {
-        onBookAdded(savedBook)
+        onBookAdded(res.data)
         setFormData({
           title: '',
           author: '',
@@ -56,8 +45,8 @@ function BookForm({ onBookAdded }) {
         })
         setError('')
       })
-      .catch((err) => {
-        setError(err.message)
+      .catch(() => {
+        setError('Failed to add book')
       })
   }
 
@@ -70,43 +59,22 @@ function BookForm({ onBookAdded }) {
       <form onSubmit={handleSubmit}>
         <p>
           <label>Title:</label><br />
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-          />
+          <input type="text" name="title" value={formData.title} onChange={handleChange} />
         </p>
 
         <p>
           <label>Author:</label><br />
-          <input
-            type="text"
-            name="author"
-            value={formData.author}
-            onChange={handleChange}
-          />
+          <input type="text" name="author" value={formData.author} onChange={handleChange} />
         </p>
 
         <p>
           <label>Copies:</label><br />
-          <input
-            type="number"
-            name="copies"
-            value={formData.copies}
-            onChange={handleChange}
-          />
+          <input type="number" name="copies" value={formData.copies} onChange={handleChange} />
         </p>
 
         <p>
           <label>Price:</label><br />
-          <input
-            type="number"
-            step="0.01"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-          />
+          <input type="number" step="0.01" name="price" value={formData.price} onChange={handleChange} />
         </p>
 
         <button type="submit">Add Book</button>

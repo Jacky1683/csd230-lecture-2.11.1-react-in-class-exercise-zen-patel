@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useAuth } from './authProvider'
 
 function Book({ id, title, author, copies, price, onDelete, onUpdate }) {
   const [isEditing, setIsEditing] = useState(false)
@@ -6,6 +7,8 @@ function Book({ id, title, author, copies, price, onDelete, onUpdate }) {
   const [editedAuthor, setEditedAuthor] = useState(author)
   const [editedCopies, setEditedCopies] = useState(copies)
   const [editedPrice, setEditedPrice] = useState(price)
+
+  const { isAdmin } = useAuth()
 
   const handleSave = () => {
     const updatedBook = {
@@ -34,39 +37,22 @@ function Book({ id, title, author, copies, price, onDelete, onUpdate }) {
 
           <p>
             <strong>Title:</strong><br />
-            <input
-              type="text"
-              value={editedTitle}
-              onChange={(e) => setEditedTitle(e.target.value)}
-            />
+            <input type="text" value={editedTitle} onChange={(e) => setEditedTitle(e.target.value)} />
           </p>
 
           <p>
             <strong>Author:</strong><br />
-            <input
-              type="text"
-              value={editedAuthor}
-              onChange={(e) => setEditedAuthor(e.target.value)}
-            />
+            <input type="text" value={editedAuthor} onChange={(e) => setEditedAuthor(e.target.value)} />
           </p>
 
           <p>
             <strong>Copies:</strong><br />
-            <input
-              type="number"
-              value={editedCopies}
-              onChange={(e) => setEditedCopies(e.target.value)}
-            />
+            <input type="number" value={editedCopies} onChange={(e) => setEditedCopies(e.target.value)} />
           </p>
 
           <p>
             <strong>Price:</strong><br />
-            <input
-              type="number"
-              step="0.01"
-              value={editedPrice}
-              onChange={(e) => setEditedPrice(e.target.value)}
-            />
+            <input type="number" step="0.01" value={editedPrice} onChange={(e) => setEditedPrice(e.target.value)} />
           </p>
 
           <button onClick={handleSave}>Save</button>
@@ -81,13 +67,17 @@ function Book({ id, title, author, copies, price, onDelete, onUpdate }) {
           <p><strong>Copies:</strong> {copies}</p>
           <p><strong>Price:</strong> ${Number(price).toFixed(2)}</p>
 
-          <button onClick={() => setIsEditing(true)}>Update</button>
-          <button
-            onClick={() => onDelete(id)}
-            style={{ marginLeft: '10px', backgroundColor: '#d9534f', color: 'white' }}
-          >
-            Delete
-          </button>
+          {isAdmin && (
+            <>
+              <button onClick={() => setIsEditing(true)}>Update</button>
+              <button
+                onClick={() => onDelete(id)}
+                style={{ marginLeft: '10px', backgroundColor: '#d9534f', color: 'white' }}
+              >
+                Delete
+              </button>
+            </>
+          )}
         </>
       )}
     </div>

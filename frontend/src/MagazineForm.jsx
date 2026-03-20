@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import api from './api/axiosConfig'
 
 function MagazineForm({ onMagazineAdded }) {
   const [formData, setFormData] = useState({
@@ -41,22 +42,9 @@ function MagazineForm({ onMagazineAdded }) {
       currentIssue: `${formData.currentIssue}T00:00:00`
     }
 
-    fetch('/api/magazines', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(newMagazine)
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const text = await res.text()
-          throw new Error(text || 'Failed to add magazine')
-        }
-        return res.json()
-      })
-      .then((savedMagazine) => {
-        onMagazineAdded(savedMagazine)
+    api.post('/api/magazines', newMagazine)
+      .then((res) => {
+        onMagazineAdded(res.data)
         setFormData({
           title: '',
           price: '',
@@ -67,7 +55,7 @@ function MagazineForm({ onMagazineAdded }) {
         setError('')
       })
       .catch((err) => {
-        setError(err.message)
+        setError('Failed to add magazine')
       })
   }
 
@@ -80,53 +68,27 @@ function MagazineForm({ onMagazineAdded }) {
       <form onSubmit={handleSubmit}>
         <p>
           <label>Title:</label><br />
-          <input
-            type="text"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-          />
+          <input type="text" name="title" value={formData.title} onChange={handleChange} />
         </p>
 
         <p>
           <label>Price:</label><br />
-          <input
-            type="number"
-            step="0.01"
-            name="price"
-            value={formData.price}
-            onChange={handleChange}
-          />
+          <input type="number" step="0.01" name="price" value={formData.price} onChange={handleChange} />
         </p>
 
         <p>
           <label>Copies:</label><br />
-          <input
-            type="number"
-            name="copies"
-            value={formData.copies}
-            onChange={handleChange}
-          />
+          <input type="number" name="copies" value={formData.copies} onChange={handleChange} />
         </p>
 
         <p>
           <label>Order Quantity:</label><br />
-          <input
-            type="number"
-            name="orderQty"
-            value={formData.orderQty}
-            onChange={handleChange}
-          />
+          <input type="number" name="orderQty" value={formData.orderQty} onChange={handleChange} />
         </p>
 
         <p>
           <label>Current Issue:</label><br />
-          <input
-            type="date"
-            name="currentIssue"
-            value={formData.currentIssue}
-            onChange={handleChange}
-          />
+          <input type="date" name="currentIssue" value={formData.currentIssue} onChange={handleChange} />
         </p>
 
         <button type="submit">Add Magazine</button>

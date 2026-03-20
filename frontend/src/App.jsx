@@ -1,44 +1,50 @@
 import { useEffect, useState } from 'react'
-import { Routes, Route } from 'react-router'
+import { Routes, Route, Navigate, useLocation } from 'react-router'
 import Navbar from './Navbar'
 import Home from './Home'
 import Book from './Book'
 import BookForm from './BookForm'
 import Magazine from './Magazine'
 import MagazineForm from './MagazineForm'
+import Login from './Login'
 import './App.css'
+import { useAuth } from './authProvider'
+import api from './api/axiosConfig'
 
 function App() {
   const [books, setBooks] = useState([])
   const [magazines, setMagazines] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
+  const { isAdmin, isAuthenticated } = useAuth()
+  const location = useLocation()
+
   useEffect(() => {
+    const publicPaths = ['/', '/login']
+
+    if (!isAuthenticated || publicPaths.includes(location.pathname)) {
+      setLoading(false)
+      setError(null)
+      return
+    }
+
+    setLoading(true)
+
     Promise.all([
-      fetch('/api/books').then((res) => {
-        if (!res.ok) {
-          throw new Error('Could not fetch books')
-        }
-        return res.json()
-      }),
-      fetch('/api/magazines').then((res) => {
-        if (!res.ok) {
-          throw new Error('Could not fetch magazines')
-        }
-        return res.json()
-      })
+      api.get('/api/books'),
+      api.get('/api/magazines')
     ])
-      .then(([booksData, magazinesData]) => {
-        setBooks(booksData)
-        setMagazines(magazinesData)
+      .then(([booksRes, magazinesRes]) => {
+        setBooks(booksRes.data)
+        setMagazines(magazinesRes.data)
         setLoading(false)
       })
       .catch((err) => {
         setError(err.message)
         setLoading(false)
       })
-  }, [])
+  }, [isAuthenticated, location.pathname])
 
   const handleAddBook = (newBook) => {
     setBooks([...books, newBook])
@@ -47,39 +53,22 @@ function App() {
   const handleDeleteBook = (id) => {
     if (!window.confirm('Delete this book?')) return
 
-    fetch(`/api/books/${id}`, {
-      method: 'DELETE'
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Failed to delete book')
-        }
+    api.delete(`/api/books/${id}`)
+      .then(() => {
         setBooks(books.filter((book) => book.id !== id))
       })
-      .catch((err) => {
-        alert(err.message)
+      .catch(() => {
+        alert('Failed to delete book')
       })
   }
 
   const handleUpdateBook = (id, updatedData) => {
-    fetch(`/api/books/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(updatedData)
-    })
+    api.put(`/api/books/${id}`, updatedData)
       .then((res) => {
-        if (!res.ok) {
-          throw new Error('Failed to update book')
-        }
-        return res.json()
+        setBooks(books.map((book) => (book.id === id ? res.data : book)))
       })
-      .then((updatedBook) => {
-        setBooks(books.map((book) => (book.id === id ? updatedBook : book)))
-      })
-      .catch((err) => {
-        alert(err.message)
+      .catch(() => {
+        alert('Failed to update book')
       })
   }
 
@@ -90,107 +79,112 @@ function App() {
   const handleDeleteMagazine = (id) => {
     if (!window.confirm('Delete this magazine?')) return
 
-    fetch(`/api/magazines/${id}`, {
-      method: 'DELETE'
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Failed to delete magazine')
-        }
+    api.delete(`/api/magazines/${id}`)
+      .then(() => {
         setMagazines(magazines.filter((magazine) => magazine.id !== id))
       })
-      .catch((err) => {
-        alert(err.message)
+      .catch(() => {
+        alert('Failed to delete magazine')
       })
   }
 
   const handleUpdateMagazine = (id, updatedData) => {
-    fetch(`/api/magazines/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(updatedData)
-    })
+    api.put(`/api/magazines/${id}`, updatedData)
       .then((res) => {
-        if (!res.ok) {
-          throw new Error('Failed to update magazine')
-        }
-        return res.json()
-      })
-      .then((updatedMagazine) => {
         setMagazines(
           magazines.map((magazine) =>
-            magazine.id === id ? updatedMagazine : magazine
+            magazine.id === id ? res.data : magazine
           )
         )
       })
-      .catch((err) => {
-        alert(err.message)
+      .catch(() => {
+        alert('Failed to update magazine')
       })
   }
 
   if (loading) return <h2>Loading...</h2>
-  if (error) return <h2>Error: {error}</h2>
 
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
       <Navbar />
 
+      {error && isAuthenticated && (
+        <p style={{ color: 'red', fontWeight: 'bold' }}>
+          Error: {error}
+        </p>
+      )}
+
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
 
         <Route
           path="/inventory"
           element={
-            <div>
-              <h1>Current Book Inventory</h1>
-              {books.map((book) => (
-                <Book
-                  key={book.id}
-                  {...book}
-                  onDelete={handleDeleteBook}
-                  onUpdate={handleUpdateBook}
-                />
-              ))}
-            </div>
+            isAuthenticated ? (
+              <div>
+                <h1>Current Book Inventory</h1>
+                {books.map((book) => (
+                  <Book
+                    key={book.id}
+                    {...book}
+                    onDelete={handleDeleteBook}
+                    onUpdate={handleUpdateBook}
+                  />
+                ))}
+              </div>
+            ) : (
+              <Navigate to="/login" />
+            )
           }
         />
 
         <Route
           path="/add"
           element={
-            <div>
-              <h1>Add Book</h1>
-              <BookForm onBookAdded={handleAddBook} />
-            </div>
+            isAdmin ? (
+              <div>
+                <h1>Add Book</h1>
+                <BookForm onBookAdded={handleAddBook} />
+              </div>
+            ) : (
+              <Navigate to="/" />
+            )
           }
         />
 
         <Route
           path="/magazines"
           element={
-            <div>
-              <h1>Current Magazine Inventory</h1>
-              {magazines.map((magazine) => (
-                <Magazine
-                  key={magazine.id}
-                  {...magazine}
-                  onDelete={handleDeleteMagazine}
-                  onUpdate={handleUpdateMagazine}
-                />
-              ))}
-            </div>
+            isAuthenticated ? (
+              <div>
+                <h1>Current Magazine Inventory</h1>
+                {magazines.map((magazine) => (
+                  <Magazine
+                    key={magazine.id}
+                    {...magazine}
+                    onDelete={handleDeleteMagazine}
+                    onUpdate={handleUpdateMagazine}
+                  />
+                ))}
+              </div>
+            ) : (
+              <Navigate to="/login" />
+            )
           }
         />
 
         <Route
           path="/add-magazine"
           element={
-            <div>
-              <h1>Add Magazine</h1>
-              <MagazineForm onMagazineAdded={handleAddMagazine} />
-            </div>
+            isAdmin ? (
+              <div>
+                <h1>Add Magazine</h1>
+                <MagazineForm onMagazineAdded={handleAddMagazine} />
+              </div>
+            ) : (
+              <Navigate to="/" />
+            )
           }
         />
       </Routes>

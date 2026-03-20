@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useAuth } from './authProvider'
 
 function Magazine({ id, title, price, copies, orderQty, currentIssue, onDelete, onUpdate }) {
   const [isEditing, setIsEditing] = useState(false)
@@ -9,6 +10,8 @@ function Magazine({ id, title, price, copies, orderQty, currentIssue, onDelete, 
   const [editedCurrentIssue, setEditedCurrentIssue] = useState(
     currentIssue ? currentIssue.substring(0, 10) : ''
   )
+
+  const { isAdmin } = useAuth()
 
   const handleSave = () => {
     const updatedMagazine = {
@@ -102,13 +105,17 @@ function Magazine({ id, title, price, copies, orderQty, currentIssue, onDelete, 
           <p><strong>Order Quantity:</strong> {orderQty}</p>
           <p><strong>Current Issue:</strong> {formatDate(currentIssue)}</p>
 
-          <button onClick={() => setIsEditing(true)}>Update</button>
-          <button
-            onClick={() => onDelete(id)}
-            style={{ marginLeft: '10px', backgroundColor: '#d9534f', color: 'white' }}
-          >
-            Delete
-          </button>
+          {isAdmin && (
+            <>
+              <button onClick={() => setIsEditing(true)}>Update</button>
+              <button
+                onClick={() => onDelete(id)}
+                style={{ marginLeft: '10px', backgroundColor: '#d9534f', color: 'white' }}
+              >
+                Delete
+              </button>
+            </>
+          )}
         </>
       )}
     </div>

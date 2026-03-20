@@ -1,6 +1,9 @@
 import { Link } from 'react-router'
+import { useAuth } from './authProvider'
 
 function Navbar() {
+  const { isAdmin, isAuthenticated, logout } = useAuth()
+
   return (
     <nav
       style={{
@@ -27,12 +30,14 @@ function Navbar() {
         View Books
       </Link>
 
-      <Link
-        to="/add"
-        style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}
-      >
-        Add Book
-      </Link>
+      {isAdmin && (
+        <Link
+          to="/add"
+          style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}
+        >
+          Add Book
+        </Link>
+      )}
 
       <Link
         to="/magazines"
@@ -41,12 +46,36 @@ function Navbar() {
         View Magazines
       </Link>
 
-      <Link
-        to="/add-magazine"
-        style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}
-      >
-        Add Magazine
-      </Link>
+      {isAdmin && (
+        <Link
+          to="/add-magazine"
+          style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}
+        >
+          Add Magazine
+        </Link>
+      )}
+
+      {!isAuthenticated ? (
+        <Link
+          to="/login"
+          style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}
+        >
+          Login
+        </Link>
+      ) : (
+        <button
+          onClick={logout}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            color: 'white',
+            fontWeight: 'bold',
+            cursor: 'pointer'
+          }}
+        >
+          Logout
+        </button>
+      )}
     </nav>
   )
 }
