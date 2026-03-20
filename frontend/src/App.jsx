@@ -1,34 +1,200 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useEffect, useState } from 'react'
+import { Routes, Route } from 'react-router'
+import Navbar from './Navbar'
+import Home from './Home'
+import Book from './Book'
+import BookForm from './BookForm'
+import Magazine from './Magazine'
+import MagazineForm from './MagazineForm'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [books, setBooks] = useState([])
+  const [magazines, setMagazines] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/books').then((res) => {
+        if (!res.ok) {
+          throw new Error('Could not fetch books')
+        }
+        return res.json()
+      }),
+      fetch('/api/magazines').then((res) => {
+        if (!res.ok) {
+          throw new Error('Could not fetch magazines')
+        }
+        return res.json()
+      })
+    ])
+      .then(([booksData, magazinesData]) => {
+        setBooks(booksData)
+        setMagazines(magazinesData)
+        setLoading(false)
+      })
+      .catch((err) => {
+        setError(err.message)
+        setLoading(false)
+      })
+  }, [])
+
+  const handleAddBook = (newBook) => {
+    setBooks([...books, newBook])
+  }
+
+  const handleDeleteBook = (id) => {
+    if (!window.confirm('Delete this book?')) return
+
+    fetch(`/api/books/${id}`, {
+      method: 'DELETE'
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Failed to delete book')
+        }
+        setBooks(books.filter((book) => book.id !== id))
+      })
+      .catch((err) => {
+        alert(err.message)
+      })
+  }
+
+  const handleUpdateBook = (id, updatedData) => {
+    fetch(`/api/books/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updatedData)
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Failed to update book')
+        }
+        return res.json()
+      })
+      .then((updatedBook) => {
+        setBooks(books.map((book) => (book.id === id ? updatedBook : book)))
+      })
+      .catch((err) => {
+        alert(err.message)
+      })
+  }
+
+  const handleAddMagazine = (newMagazine) => {
+    setMagazines([...magazines, newMagazine])
+  }
+
+  const handleDeleteMagazine = (id) => {
+    if (!window.confirm('Delete this magazine?')) return
+
+    fetch(`/api/magazines/${id}`, {
+      method: 'DELETE'
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Failed to delete magazine')
+        }
+        setMagazines(magazines.filter((magazine) => magazine.id !== id))
+      })
+      .catch((err) => {
+        alert(err.message)
+      })
+  }
+
+  const handleUpdateMagazine = (id, updatedData) => {
+    fetch(`/api/magazines/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updatedData)
+    })
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error('Failed to update magazine')
+        }
+        return res.json()
+      })
+      .then((updatedMagazine) => {
+        setMagazines(
+          magazines.map((magazine) =>
+            magazine.id === id ? updatedMagazine : magazine
+          )
+        )
+      })
+      .catch((err) => {
+        alert(err.message)
+      })
+  }
+
+  if (loading) return <h2>Loading...</h2>
+  if (error) return <h2>Error: {error}</h2>
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
+      <Navbar />
+
+      <Routes>
+        <Route path="/" element={<Home />} />
+
+        <Route
+          path="/inventory"
+          element={
+            <div>
+              <h1>Current Book Inventory</h1>
+              {books.map((book) => (
+                <Book
+                  key={book.id}
+                  {...book}
+                  onDelete={handleDeleteBook}
+                  onUpdate={handleUpdateBook}
+                />
+              ))}
+            </div>
+          }
+        />
+
+        <Route
+          path="/add"
+          element={
+            <div>
+              <h1>Add Book</h1>
+              <BookForm onBookAdded={handleAddBook} />
+            </div>
+          }
+        />
+
+        <Route
+          path="/magazines"
+          element={
+            <div>
+              <h1>Current Magazine Inventory</h1>
+              {magazines.map((magazine) => (
+                <Magazine
+                  key={magazine.id}
+                  {...magazine}
+                  onDelete={handleDeleteMagazine}
+                  onUpdate={handleUpdateMagazine}
+                />
+              ))}
+            </div>
+          }
+        />
+
+        <Route
+          path="/add-magazine"
+          element={
+            <div>
+              <h1>Add Magazine</h1>
+              <MagazineForm onMagazineAdded={handleAddMagazine} />
+            </div>
+          }
+        />
+      </Routes>
+    </div>
   )
 }
 
