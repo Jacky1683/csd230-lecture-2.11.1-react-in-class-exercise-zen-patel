@@ -43,7 +43,19 @@ public class WebSecurityConfig {
                 .cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/h2-console/**", "/error").permitAll()
+                        .requestMatchers(
+                                "/",
+                                "/index.html",
+                                "/login",
+                                "/inventory",
+                                "/magazines",
+                                "/add",
+                                "/add-magazine",
+                                "/assets/**",
+                                "/favicon.ico",
+                                "/h2-console/**",
+                                "/error"
+                        ).permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/books/**", "/api/magazines/**")
                         .hasAnyRole("USER", "ADMIN")
