@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import api from './api/axiosConfig';
 import Book from './Book';
 
@@ -6,6 +6,7 @@ function BooksPage() {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     loadBooks();
@@ -33,16 +34,17 @@ function BooksPage() {
     }
   };
 
-  const handleUpdate = async (id, updatedBook) => {
-    try {
-      const response = await api.put(`/api/books/${id}`, updatedBook);
-      setBooks((prev) =>
-        prev.map((book) => (book.id === id ? response.data : book))
-      );
-    } catch (err) {
-      setError('Failed to update book.');
-    }
-  };
+  const filteredBooks = useMemo(() => {
+    const term = searchTerm.toLowerCase().trim();
+
+    if (!term) return books;
+
+    return books.filter(
+      (book) =>
+        book.title?.toLowerCase().includes(term) ||
+        book.author?.toLowerCase().includes(term)
+    );
+  }, [books, searchTerm]);
 
   return (
     <div className="form-page">
@@ -50,15 +52,25 @@ function BooksPage() {
         <p className="section-label">Inventory</p>
         <h1>Books</h1>
         <p className="section-subtitle">
-          View, update, and manage all book inventory records.
+          View, search, and manage all book inventory records.
         </p>
+
+        <div className="search-bar-wrap">
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search books by title or author..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
 
         {loading && <p>Loading books...</p>}
         {error && <p className="form-message error">{error}</p>}
-        {!loading && books.length === 0 && <p>No books available.</p>}
+        {!loading && filteredBooks.length === 0 && <p>No matching books found.</p>}
 
         {!loading &&
-          books.map((book) => (
+          filteredBooks.map((book) => (
             <Book
               key={book.id}
               id={book.id}
@@ -67,7 +79,6 @@ function BooksPage() {
               copies={book.copies}
               price={book.price}
               onDelete={handleDelete}
-              onUpdate={handleUpdate}
             />
           ))}
       </div>

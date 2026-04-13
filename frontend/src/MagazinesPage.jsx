@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import api from './api/axiosConfig';
 import Magazine from './Magazine';
 
@@ -6,6 +6,7 @@ function MagazinesPage() {
   const [magazines, setMagazines] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     loadMagazines();
@@ -33,16 +34,15 @@ function MagazinesPage() {
     }
   };
 
-  const handleUpdate = async (id, updatedMagazine) => {
-    try {
-      const response = await api.put(`/api/magazines/${id}`, updatedMagazine);
-      setMagazines((prev) =>
-        prev.map((mag) => (mag.id === id ? response.data : mag))
-      );
-    } catch (err) {
-      setError('Failed to update magazine.');
-    }
-  };
+  const filteredMagazines = useMemo(() => {
+    const term = searchTerm.toLowerCase().trim();
+
+    if (!term) return magazines;
+
+    return magazines.filter((mag) =>
+      mag.title?.toLowerCase().includes(term)
+    );
+  }, [magazines, searchTerm]);
 
   return (
     <div className="form-page">
@@ -50,15 +50,25 @@ function MagazinesPage() {
         <p className="section-label">Inventory</p>
         <h1>Magazines</h1>
         <p className="section-subtitle">
-          View, update, and manage all magazine inventory records.
+          View, search, and manage all magazine inventory records.
         </p>
+
+        <div className="search-bar-wrap">
+          <input
+            type="text"
+            className="search-input"
+            placeholder="Search magazines by title..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
 
         {loading && <p>Loading magazines...</p>}
         {error && <p className="form-message error">{error}</p>}
-        {!loading && magazines.length === 0 && <p>No magazines available.</p>}
+        {!loading && filteredMagazines.length === 0 && <p>No matching magazines found.</p>}
 
         {!loading &&
-          magazines.map((mag) => (
+          filteredMagazines.map((mag) => (
             <Magazine
               key={mag.id}
               id={mag.id}
@@ -68,7 +78,6 @@ function MagazinesPage() {
               orderQty={mag.orderQty}
               currentIssue={mag.currentIssue}
               onDelete={handleDelete}
-              onUpdate={handleUpdate}
             />
           ))}
       </div>
