@@ -310,3 +310,168 @@
     font-size: 1.9rem;
   }
 }
+
+.inventory-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 22px;
+  margin-top: 18px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.inventory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.inventory-header h3 {
+  margin: 0;
+  color: #0f172a;
+}
+
+.inventory-badge {
+  background: #dbeafe;
+  color: #1d4ed8;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.inventory-details p {
+  margin: 8px 0;
+  color: #334155;
+}
+
+.inventory-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.small-btn {
+  padding: 10px 14px;
+  font-size: 0.95rem;
+}
+
+.danger-btn {
+  border: none;
+  border-radius: 14px;
+  padding: 10px 14px;
+  background: #ef4444;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.danger-btn:hover {
+  background: #dc2626;
+}
+
+.secondary-btn {
+  border: none;
+  border-radius: 14px;
+  padding: 12px 16px;
+  background: #334155;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.secondary-btn:hover {
+  background: #1e293b;
+}
+
+.logout-btn {
+  border: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.cart-card-wide {
+  max-width: 1000px;
+}
+
+.cart-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #f8fafc;
+  flex-wrap: wrap;
+}
+
+.cart-item-info h3 {
+  margin: 0 0 10px;
+  color: #0f172a;
+}
+
+.cart-item-info p {
+  margin: 6px 0;
+  color: #475569;
+}
+
+.cart-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 220px;
+}
+
+.qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.qty-controls button {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.qty-controls span {
+  font-weight: 700;
+  min-width: 20px;
+  text-align: center;
+}
+
+.cart-subtotal {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.cart-summary {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.cart-summary h2 {
+  margin: 0 0 16px;
+  color: #0f172a;
+}
+
+.cart-summary-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}

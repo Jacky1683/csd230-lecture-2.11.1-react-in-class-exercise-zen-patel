@@ -1,125 +1,48 @@
-import { useState } from 'react'
-import { useAuth } from './authProvider'
+import { useCart } from './CartContext';
 
-function Magazine({ id, title, price, copies, orderQty, currentIssue, onDelete, onUpdate }) {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editedTitle, setEditedTitle] = useState(title)
-  const [editedPrice, setEditedPrice] = useState(price)
-  const [editedCopies, setEditedCopies] = useState(copies)
-  const [editedOrderQty, setEditedOrderQty] = useState(orderQty)
-  const [editedCurrentIssue, setEditedCurrentIssue] = useState(
-    currentIssue ? currentIssue.substring(0, 10) : ''
-  )
+function Magazine({ id, title, price, copies, orderQty, currentIssue, onDelete }) {
+  const { addToCart } = useCart();
 
-  const { isAdmin } = useAuth()
-
-  const handleSave = () => {
-    const updatedMagazine = {
-      title: editedTitle,
-      price: parseFloat(editedPrice),
-      copies: parseInt(editedCopies),
-      orderQty: parseInt(editedOrderQty),
-      currentIssue: `${editedCurrentIssue}T00:00:00`
-    }
-
-    onUpdate(id, updatedMagazine)
-    setIsEditing(false)
-  }
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A'
-    return dateString.substring(0, 10)
-  }
+  const handleAddToCart = () => {
+    addToCart({
+      id,
+      title,
+      price,
+      productType: 'Magazine',
+    });
+  };
 
   return (
-    <div
-      style={{
-        border: '1px solid #ccc',
-        borderRadius: '8px',
-        padding: '15px',
-        marginBottom: '15px',
-        backgroundColor: '#f9f9f9',
-        color: '#000'
-      }}
-    >
-      {isEditing ? (
-        <>
-          <h3>Edit Magazine</h3>
+    <div className="inventory-card">
+      <div className="inventory-header">
+        <h3>{title}</h3>
+        <span className="inventory-badge">Magazine</span>
+      </div>
 
-          <p>
-            <strong>Title:</strong><br />
-            <input
-              type="text"
-              value={editedTitle}
-              onChange={(e) => setEditedTitle(e.target.value)}
-            />
-          </p>
+      <div className="inventory-details">
+        <p><strong>Price:</strong> ${Number(price || 0).toFixed(2)}</p>
+        <p><strong>Copies:</strong> {copies}</p>
+        <p><strong>Order Quantity:</strong> {orderQty}</p>
+        <p><strong>Current Issue:</strong> {currentIssue || 'N/A'}</p>
+      </div>
 
-          <p>
-            <strong>Price:</strong><br />
-            <input
-              type="number"
-              step="0.01"
-              value={editedPrice}
-              onChange={(e) => setEditedPrice(e.target.value)}
-            />
-          </p>
+      <div className="inventory-actions">
+        <button className="primary-btn small-btn" type="button" onClick={handleAddToCart}>
+          Add to Cart
+        </button>
 
-          <p>
-            <strong>Copies:</strong><br />
-            <input
-              type="number"
-              value={editedCopies}
-              onChange={(e) => setEditedCopies(e.target.value)}
-            />
-          </p>
-
-          <p>
-            <strong>Order Quantity:</strong><br />
-            <input
-              type="number"
-              value={editedOrderQty}
-              onChange={(e) => setEditedOrderQty(e.target.value)}
-            />
-          </p>
-
-          <p>
-            <strong>Current Issue:</strong><br />
-            <input
-              type="date"
-              value={editedCurrentIssue}
-              onChange={(e) => setEditedCurrentIssue(e.target.value)}
-            />
-          </p>
-
-          <button onClick={handleSave}>Save</button>
-          <button onClick={() => setIsEditing(false)} style={{ marginLeft: '10px' }}>
-            Cancel
+        {onDelete && (
+          <button
+            className="danger-btn"
+            type="button"
+            onClick={() => onDelete(id)}
+          >
+            Delete
           </button>
-        </>
-      ) : (
-        <>
-          <h3>{title}</h3>
-          <p><strong>Price:</strong> ${Number(price).toFixed(2)}</p>
-          <p><strong>Copies:</strong> {copies}</p>
-          <p><strong>Order Quantity:</strong> {orderQty}</p>
-          <p><strong>Current Issue:</strong> {formatDate(currentIssue)}</p>
-
-          {isAdmin && (
-            <>
-              <button onClick={() => setIsEditing(true)}>Update</button>
-              <button
-                onClick={() => onDelete(id)}
-                style={{ marginLeft: '10px', backgroundColor: '#d9534f', color: 'white' }}
-              >
-                Delete
-              </button>
-            </>
-          )}
-        </>
-      )}
+        )}
+      </div>
     </div>
-  )
+  );
 }
 
-export default Magazine
+export default Magazine;

@@ -1,10 +1,12 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './authProvider';
+import { useCart } from './CartContext';
 
 function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
+  const { cartCount } = useCart();
 
   const isActive = (path) => location.pathname === path;
 
@@ -49,6 +51,10 @@ function Navbar() {
             to="/add-magazine"
           >
             Add Magazine
+          </Link>
+
+          <Link className={isActive('/cart') ? 'nav-link active' : 'nav-link'} to="/cart">
+            Cart ({cartCount})
           </Link>
 
           {!isAuthenticated ? (

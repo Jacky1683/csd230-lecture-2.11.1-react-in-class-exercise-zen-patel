@@ -7,6 +7,7 @@ import Login from './Login';
 import Home from './Home';
 import BooksPage from './BooksPage';
 import MagazinesPage from './MagazinesPage';
+import Cart from './Cart';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/add-book" element={<BookForm />} />
             <Route path="/magazines" element={<MagazinesPage />} />
             <Route path="/add-magazine" element={<MagazineForm />} />
+            <Route path="/cart" element={<Cart />} />
           </Routes>
         </main>
       </div>
