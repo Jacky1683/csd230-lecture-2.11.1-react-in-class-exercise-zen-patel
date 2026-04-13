@@ -1,83 +1,69 @@
-import { Link } from 'react-router'
-import { useAuth } from './authProvider'
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from './authProvider';
 
 function Navbar() {
-  const { isAdmin, isAuthenticated, logout } = useAuth()
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, logout } = useAuth();
+
+  const isActive = (path) => location.pathname === path;
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   return (
-    <nav
-      style={{
-        backgroundColor: '#222',
-        padding: '15px',
-        display: 'flex',
-        gap: '20px',
-        borderRadius: '8px',
-        marginBottom: '20px',
-        flexWrap: 'wrap'
-      }}
-    >
-      <Link
-        to="/"
-        style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}
-      >
-        Home
-      </Link>
+    <header className="topbar">
+      <div className="topbar-inner">
+        <div className="brand">
+          <span className="brand-mark">JB</span>
+          <div>
+            <h2>Jacky&apos;s Bookstore</h2>
+            <p>Lab 8 Portfolio Upgrade</p>
+          </div>
+        </div>
 
-      <Link
-        to="/inventory"
-        style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}
-      >
-        View Books
-      </Link>
+        <nav className="nav-links">
+          <Link className={isActive('/') ? 'nav-link active' : 'nav-link'} to="/">
+            Home
+          </Link>
 
-      {isAdmin && (
-        <Link
-          to="/add"
-          style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}
-        >
-          Add Book
-        </Link>
-      )}
+          <Link className={isActive('/books') ? 'nav-link active' : 'nav-link'} to="/books">
+            View Books
+          </Link>
 
-      <Link
-        to="/magazines"
-        style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}
-      >
-        View Magazines
-      </Link>
+          <Link className={isActive('/add-book') ? 'nav-link active' : 'nav-link'} to="/add-book">
+            Add Book
+          </Link>
 
-      {isAdmin && (
-        <Link
-          to="/add-magazine"
-          style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}
-        >
-          Add Magazine
-        </Link>
-      )}
+          <Link
+            className={isActive('/magazines') ? 'nav-link active' : 'nav-link'}
+            to="/magazines"
+          >
+            View Magazines
+          </Link>
 
-      {!isAuthenticated ? (
-        <Link
-          to="/login"
-          style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}
-        >
-          Login
-        </Link>
-      ) : (
-        <button
-          onClick={logout}
-          style={{
-            background: 'transparent',
-            border: 'none',
-            color: 'white',
-            fontWeight: 'bold',
-            cursor: 'pointer'
-          }}
-        >
-          Logout
-        </button>
-      )}
-    </nav>
-  )
+          <Link
+            className={isActive('/add-magazine') ? 'nav-link active' : 'nav-link'}
+            to="/add-magazine"
+          >
+            Add Magazine
+          </Link>
+
+          {!isAuthenticated ? (
+            <Link className={isActive('/login') ? 'nav-link active' : 'nav-link'} to="/login">
+              Login
+            </Link>
+          ) : (
+            <button className="nav-link logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
+          )}
+        </nav>
+      </div>
+    </header>
+  );
 }
 
-export default Navbar
+export default Navbar;

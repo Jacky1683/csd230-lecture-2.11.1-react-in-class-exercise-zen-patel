@@ -1,81 +1,97 @@
-import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router'
-import api from './api/axiosConfig'
-import { useAuth } from './authProvider'
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useAuth } from './authProvider';
 
 function Login() {
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+  });
 
-  const { login } = useAuth()
-  const navigate = useNavigate()
-  const location = useLocation()
-  const params = new URLSearchParams(location.search)
-  const sessionExpired = params.get('expired') === 'true'
+  const [message, setMessage] = useState('');
+  const [isError, setIsError] = useState(false);
+
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
+    e.preventDefault();
+    setMessage('');
+    setIsError(false);
 
     try {
-      const response = await api.post('/api/auth/login', {
-        username,
-        password
-      })
+      const response = await axios.post('http://localhost:8080/api/auth/login', formData);
+      login(response.data.token);
+      setMessage('Login successful.');
+      setIsError(false);
 
-      const token = response.data.token || response.data.jwt || response.data.accessToken
-
-      if (!token) {
-        throw new Error('No token returned from server')
-      }
-
-      login(token)
-      navigate('/')
-    } catch (err) {
-      setError('Invalid username or password')
+      setTimeout(() => {
+        navigate('/books');
+      }, 500);
+    } catch (error) {
+      setMessage('Invalid username or password.');
+      setIsError(true);
     }
-  }
+  };
 
   return (
-    <div style={{ maxWidth: '500px', margin: '40px auto', color: '#000' }}>
-      <h1>Login</h1>
-
-      {sessionExpired && (
-        <p style={{ color: 'orange', fontWeight: 'bold' }}>
-          Session Expired. Please log in again.
-        </p>
-      )}
-
-      {error && (
-        <p style={{ color: 'red', fontWeight: 'bold' }}>
-          {error}
-        </p>
-      )}
-
-      <form onSubmit={handleSubmit}>
-        <p>
-          <label>Username:</label><br />
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
+    <div className="form-page">
+      <div className="form-card">
+        <p className="section-label">Account Access</p>
+        <h1>Login</h1>
+        <p className="section-subtitle">
+          Sign in to manage bookstore inventory and protected features.
         </p>
 
-        <p>
-          <label>Password:</label><br />
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </p>
+        <form className="styled-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="username">Username</label>
+            <input
+              id="username"
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="Enter your username"
+              required
+            />
+          </div>
 
-        <button type="submit">Login</button>
-      </form>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          <button className="primary-btn" type="submit">
+            Login
+          </button>
+        </form>
+
+        {message && (
+          <p className={isError ? 'form-message error' : 'form-message success'}>
+            {message}
+          </p>
+        )}
+      </div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;
